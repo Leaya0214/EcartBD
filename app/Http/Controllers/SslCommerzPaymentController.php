@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Library\SslCommerz\SslCommerzNotification;
 use App\Services\OrderService;
 use App\Services\Payment\SSLCommerzService;
+use App\Models\PaymentAttempt;
+use App\Models\Order;
+use Illuminate\Support\Facades\Log;
 
 class SslCommerzPaymentController extends Controller
 {
@@ -94,14 +97,13 @@ class SslCommerzPaymentController extends Controller
                 session()->forget('cart');
             }
 
-            // Redirect to a success page with order details
-            return redirect()->route('order.success', ['order_id' => $order->id ?? 'unknown'])
-                ->with('message', 'Payment successful and order placed!');
+            // Redirect back to the checkout/cart page for guest users with a notice query param
+            return redirect()->route('viewcart', ['notice' => 'success', 'order_id' => $order->id ?? 'unknown']);
         } else {
             // Payment validation failed or status is not 'VALID'
             // Update the PaymentAttempt status to 'failed'
             $this->orderService->updatePaymentAttemptStatus($transactionId, 'failed', $response);
-            return redirect()->route('order.fail')->with('error', 'Payment failed or validation error. Please try again.');
+            return redirect()->route('viewcart', ['notice' => 'failed']);
         }
     }
 
@@ -118,7 +120,7 @@ class SslCommerzPaymentController extends Controller
             $this->orderService->updatePaymentAttemptStatus($transactionId, 'failed', $response);
         }
 
-        return redirect()->route('order.fail')->with('error', 'Payment failed.');
+        return redirect()->route('viewcart', ['notice' => 'failed']);
     }
 
     /**
@@ -134,7 +136,7 @@ class SslCommerzPaymentController extends Controller
             $this->orderService->updatePaymentAttemptStatus($transactionId, 'cancelled', $response);
         }
 
-        return redirect()->route('order.cancel')->with('error', 'Payment cancelled by user.');
+        return redirect()->route('viewcart', ['notice' => 'cancel']);
     }
 
     /**
@@ -156,7 +158,7 @@ class SslCommerzPaymentController extends Controller
 
         // If no payment attempt found, it's an unexpected IPN or old transaction, just log and return OK
         if (!$paymentAttempt) {
-            \Log::warning("IPN received for unknown transaction_id: {$transactionId}", $response);
+            Log::warning("IPN received for unknown transaction_id: {$transactionId}", $response);
             return response('OK', 200);
         }
 
@@ -182,7 +184,7 @@ class SslCommerzPaymentController extends Controller
             }
         } else {
             // IPN validation failed
-            \Log::error("SSLCommerz IPN validation failed for transaction: {$transactionId}", $response);
+            Log::error("SSLCommerz IPN validation failed for transaction: {$transactionId}", $response);
             // Optionally, mark attempt as 'validation_failed' if you have such a status
             $this->orderService->updatePaymentAttemptStatus($transactionId, 'validation_failed', $response);
         }

@@ -29,3 +29,6 @@
 
 <!-- custom - css include -->
 <link rel="stylesheet" type="text/css" href="{{ asset('frontend') }}/assets/css/style.css">
+
+<!-- Toastr CSS for notifications -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-5t3kG6mM0VYw8sWlPZ0+XQYV5zK1tQqv6s0bGx1Qq2Yk6FJ4G8g3FvF1JY1a2hJm9Z6QeG4k6j7Qq3k8q3rQw==" crossorigin="anonymous" referrerpolicy="no-referrer" />

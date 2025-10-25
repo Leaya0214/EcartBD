@@ -15,7 +15,18 @@ class CreatePaymentAttemptsTable extends Migration
     {
         Schema::create('payment_attempts', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('order_id')->nullable()->index();
+            $table->string('transaction_id')->nullable()->index();
+            $table->string('status')->default('initiated')->index();
+            $table->decimal('amount', 12, 2)->nullable();
+            $table->json('payload')->nullable();
+            $table->json('response')->nullable();
             $table->timestamps();
+
+            // optional foreign key if orders table exists
+            if (Schema::hasTable('orders')) {
+                $table->foreign('order_id')->references('id')->on('orders')->onDelete('set null');
+            }
         });
     }
 

@@ -38,6 +38,19 @@ Route::post('/cancel', [SslCommerzPaymentController::class, 'cancel']);
 Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
 //SSLCOMMERZ END
 
+// Order result pages used by payment callbacks
+Route::get('/order/success/{order_id}', function ($order_id) {
+    return view('frontend.pages.order_success', compact('order_id'));
+})->name('order.success');
+
+Route::get('/order/fail', function () {
+    return view('frontend.pages.order_fail');
+})->name('order.fail');
+
+Route::get('/order/cancel', function () {
+    return view('frontend.pages.order_cancel');
+})->name('order.cancel');
+
 Route::get('/',[Home::class,'index'])->name("home");
 
 //Route for search
