@@ -5,6 +5,13 @@ class SslCommerzNotification extends AbstractSslCommerz
 {
     protected $data = [];
     protected $config = [];
+    /**
+     * Holds the response data returned from SSLCOMMERZ order validation
+     * Declared to avoid undefined property errors when assigning in validate().
+     *
+     * @var mixed
+     */
+    protected $sslc_data = null;
 
     private $successUrl;
     private $cancelUrl;
@@ -415,8 +422,7 @@ class SslCommerzNotification extends AbstractSslCommerz
 
     public function setAdditionalInfo(array $info)
     {
-            dd($info);
-
+    // additional info is optional — do not dd() here (leftover debug).
         $this->data['value_a'] = (isset($info['value_a'])) ? $info['value_a'] : null; // value_a [ string (255)	- Extra parameter to pass your meta data if it is needed. Not mandatory]
         $this->data['value_b'] = (isset($info['value_b'])) ? $info['value_b'] : null; // value_b [ string (255)	- Extra parameter to pass your meta data if it is needed. Not mandatory]
         $this->data['value_c'] = (isset($info['value_c'])) ? $info['value_c'] : null; // value_c [ string (255)	- Extra parameter to pass your meta data if it is needed. Not mandatory]

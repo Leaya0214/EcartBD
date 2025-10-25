@@ -2,6 +2,17 @@
 @section('content')
 <section class="cart_section section_space">
     <div class="container">
+    {{-- Toastr notifications (CSS loaded globally in includes.css) --}}
+        @if(session('message'))
+            <input type="hidden" id="session-message" value="{{ e(session('message')) }}">
+        @endif
+        @if(session('error'))
+            <input type="hidden" id="session-error" value="{{ e(session('error')) }}">
+        @endif
+        {{-- Notice via query param will show a popup even if session cookie is lost during external redirect --}}
+        @if(request()->has('notice'))
+            <input type="hidden" id="checkout-notice" value="{{ e(request('notice')) }}">
+        @endif
         @if(count($items) > 0)
         <div class="cart_table">
             <table class="table">
@@ -147,7 +158,7 @@
 
 </section>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
 <script>
     function deliveryCharge(value){
         let charge = parseInt(value);
@@ -245,6 +256,52 @@
             }
         })
     });
+
+    // Use Toastr for notifications. Configure basic options.
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": true,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+
+    $(function(){
+        // Session flash messages
+        const sessMsg = $('#session-message').val();
+        const sessErr = $('#session-error').val();
+        if(sessMsg){
+            toastr.success(sessMsg);
+        }
+        if(sessErr){
+            toastr.error(sessErr);
+        }
+
+        // Query param notice fallback
+        const noticeEl = $('#checkout-notice');
+        if(noticeEl.length){
+            const notice = noticeEl.val();
+            if(notice === 'success'){
+                toastr.success('Payment successful and order placed!');
+            } else if(notice === 'failed' || notice === 'fail'){
+                toastr.error('Payment failed or validation error. Please try again.');
+            } else if(notice === 'cancel'){
+                toastr.warning('Payment cancelled by user.');
+            }
+        }
+    });
+</script>
+@endpush
 </script>
 
 @endsection

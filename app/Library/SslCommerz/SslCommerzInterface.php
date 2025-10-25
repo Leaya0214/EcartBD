@@ -6,7 +6,7 @@ interface SslCommerzInterface
     public function makePayment(array $data);
 
     public function orderValidate($requestData, $trxID, $amount, $currency);
-
+ 
     public function setParams($data);
 
     public function setRequiredInfo(array $data);

@@ -5,6 +5,8 @@ use App\Library\SslCommerz\SslCommerzNotification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\PaymentAttempt;
+use Illuminate\Support\Facades\Log;
 
 class SSLCommerzService
 {
@@ -44,6 +46,47 @@ class SSLCommerzService
 
         $sslc = new SslCommerzNotification();
 
+        // Create a payment attempt record so callbacks can find context
+        try {
+            PaymentAttempt::create([
+                'order_id' => $order->id,
+                'transaction_id' => $order->transaction_id,
+                'status' => 'initiated',
+                'amount' => $order->amount,
+                'payload' => [
+                    'order' => $order->toArray(),
+                    'items' => $order->items()->get()->toArray(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            // do not break payment flow if attempt record couldn't be created
+            Log::warning('Could not create PaymentAttempt: ' . $e->getMessage());
+        }
+
         return $sslc->makePayment($post_data, 'hosted');
     }
+
+    /**
+     * Verify payment response from SSLCommerz using their notification helper
+     * Returns true if validation passes, false otherwise
+     * @param array $response
+     * @return bool
+     */
+    public function verifyPayment(array $response): bool
+    {
+        $sslc = new SslCommerzNotification();
+
+        $transactionId = $response['tran_id'] ?? '';
+        $amount = isset($response['amount']) ? (float)$response['amount'] : 0;
+        $currency = $response['currency'] ?? ($response['currency_type'] ?? 'BDT');
+
+        try {
+            return $sslc->orderValidate($response, $transactionId, $amount, $currency) === true;
+        } catch (\Exception $e) {
+            Log::error('Error validating SSLCommerz response: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    // ...existing methods retained above
 }

@@ -12,3 +12,9 @@
 
     <!-- custom - main-js -->
     <script src="{{ asset('frontend') }}/assets/js/main.js"></script>
+
+   <!-- Toastr JS for notifications -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-3MU6X6XKc1b1Q1c1Y8a2k1Z3p1Yk3Zs6d1F6Y2c1V6X1b3Y1k4c1V6X1b3Y1k4c1V6X1b3Y1k4c1V6X1b3Y==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+   {{-- Slot for page-specific scripts that must run after core JS (jQuery, Bootstrap, main.js) --}}
+   @stack('scripts')
