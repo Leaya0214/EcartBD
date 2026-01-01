@@ -1,4 +1,4 @@
-<h1 align="center">Ecommerce-eShop</h1>
+<h1 align="center">EcartBd</h1>
 
 <h2>🎯 Overview</h2>
 <p>
